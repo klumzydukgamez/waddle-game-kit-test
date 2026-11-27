@@ -1,5 +1,2 @@
 CompileFlags:
   CompilationDatabase: "build"
-  Add:
-    - "--target=wasm32-unknown-emscripten"
-    - "--sysroot=C:/emsdk/upstream/emscripten/cache/sysroot"
