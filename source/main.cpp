@@ -1,7 +1,7 @@
-#include <iostream>
+#include <emscripten/console.h>
 
 int main(int argc, char* argv[]) {
-	std::cout << WGK_PROJECT_NAME << std::endl;
+	emscripten_console_log(WGK_PROJECT_NAME);
 
 	return 0;
 }
