@@ -30,6 +30,13 @@ target_include_directories(
 	"${WGK_SOURCE}"
 )
 
+target_compile_options(
+	${WGK_CONFIG_PROJECT_NAME} PRIVATE
+
+	"--target=wasm32-unknown-emscripten"
+	"--sysroot=$ENV{EMSDK}/upstream/emscripten/cache/sysroot"
+)
+
 target_compile_definitions(
 	${WGK_CONFIG_PROJECT_NAME} PRIVATE
 
