@@ -6,6 +6,8 @@ import os
 
 from typing import Any
 
+import string
+
 import tomllib
 
 import subprocess
@@ -13,14 +15,61 @@ import subprocess
 import colorama
 
 CONFIG_PATH: str = os.path.join(os.getcwd(), "config.toml")
+
 BUILD_PATH: str = os.path.join(os.getcwd(), "build")
 BUILD_OUTPUT_PATH: str = os.path.join(os.getcwd(), "build_out")
+
+INDEX_HTML_PATH: str = os.path.join(BUILD_PATH, "index.html")
+INDEX_HTML_TEMPLATE: string.Template = string.Template("""<!--
+Copyright (c) 2026 Klumzy Duk Gamez
+See LICENSE.md for terms.
+-->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #111;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+    <script type='text/javascript'>
+        var Module = {
+            canvas: (function() { return document.getElementById('canvas'); })()
+        };
+    </script> 
+    <script src="$project_name.js"></script>
+    
+</body>
+
+</html>
+""")
 
 type config_t = dict[str, Any]
 type command_t = list[str]
 
 
 def print_command(cmd: command_t) -> None:
+
     for i in cmd:
         print(colorama.Fore.MAGENTA + f"{i} ", end="")
     print("")
@@ -84,6 +133,20 @@ def verify_config(config: config_t) -> bool:
     return True
 
 
+def generate_index_html(config: config_t, path: str) -> bool:
+    data: str = INDEX_HTML_TEMPLATE.substitute(project_name=config["project"]["name"])
+    try:
+        with open(path, "w") as file:
+            file.write(data)
+            return True
+    except Exception:
+        print(
+            colorama.Fore.RED
+            + f'[WGK] Failed to generate index.html at location "{path}"'
+        )
+        return False
+
+
 def construct_config_command(config: config_t) -> command_t:
     cmd: command_t = ["emcmake", "cmake", "..", "--fresh"]
 
@@ -120,12 +183,16 @@ def main() -> int:
     colorama.init(autoreset=True)
 
     os.makedirs(BUILD_PATH, exist_ok=True)
+    os.makedirs(BUILD_OUTPUT_PATH, exist_ok=True)
 
     config: config_t = load_config(CONFIG_PATH)
     if not config:
         return 1
 
     if not verify_config(config):
+        return 1
+
+    if not generate_index_html(config, INDEX_HTML_PATH):
         return 1
 
     result = run_command(construct_config_command(config), BUILD_PATH)
