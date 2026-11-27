@@ -1,5 +1,5 @@
 [project]
-name = "PROJECT_NAME"
+name = "flappybird"
 
 [build]
 generator = "Ninja"
